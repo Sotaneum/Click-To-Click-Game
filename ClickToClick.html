@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<!-- 게임 시스템 -->
+	<script>
+		var Level=1;	//레벨
+		var LevelStartTime=0;	//레벨 시작 시간
+		var LevelEndTime=0;	//레벨 종료 시간
+		var LevelSetCount=0;	//레벨에 없애야 하는 개수
+		var LevelGetScore=0;	//레벨에 따른 점수 증감
+		var LevelSpeed=1;	//레벨 스피드
+		var LevelKillClick=0;	//레벨 클릭
+		var GameScore=0;	//게임 스코어
+		var GameStartTime=0;	//게임 시작 시간
+		var GameEndTime=0;	//게임 종료 시간
+		var movingTexts = [];
+		//게임 초기화
+		function GameReset(){
+			Level=1;	 
+			LevelStartTime=new Date().getTime();	 
+			LevelEndTime=0;	 
+			LevelSetCount=2;	 
+			LevelGetScore=11;	 
+			LevelSpeed=1;
+			GameScore=0;	 
+			GameStartTime=LevelStartTime;	 
+			GameEndTime=0;	 
+			LevelKillClick=0;
+		}
+
+		function GameLevelUp(){
+			Level++;	 
+			LevelStartTime=new Date().getTime();	 
+			LevelEndTime=0;	 
+			LevelSetCount=2*Level;	 
+			LevelGetScore=Math.round(11*Level-5+LevelSpeed);	
+			LevelSpeed=1+(Level/20); 
+			//GameScore=0;	 
+			//GameStartTime=LevelStartTime;	 
+			GameEndTime=0;	 
+			LevelKillClick=0;		
+			GameStartReset();
+		}
+
+		function GameStartReset(){
+			for(var i =0;i<LevelSetCount;i++){
+				movingTexts.push(new MovingText());
+			}
+			setInterval(function (){
+				for(var i in movingTexts){
+					movingTexts[i].move();
+				}
+			},1000/1000);
+		}
+
+		function GameOver(){
+			GameEndTime =new Date().getTime();
+			var PlayTime=(GameEndTime- GameStartTime)/1000;
+			var s=PlayTime%60;
+			var m=PlayTime/60;
+			var str='게임 끝 (이겜은 오버가 없음)\n';
+			str+='총 플레이 시간:'+m.toFixed(2)+'분\n';
+			str+='총 점수:'+GameScore+'\n';
+			str+='게임을 해줘서 감사합니다.';
+			alert(str);
+			Restart();
+			
+		}
+		function Restart()
+		{
+			location.reload();
+		}
+	</script>
+	<!-- 게임 시스템 정보 얻기 -->
+	<script>
+		function SetSystemInfomation(){
+			var s='l';
+			document.getElementById("Level").value="레벨:"+Level;
+			//document.getElementById("LevelStartTime").value="레벨 시작 시간:"+LevelStartTime;
+			//document.getElementById("LevelEndTime").value="레벨 종료 시간:"+new Date().getTime();
+			s+='ee';
+			//document.getElementById("LevelSetCount").value=LevelSetCount;
+			//document.getElementById("LevelGetScore").value=LevelGetScore;
+			document.getElementById("LevelSpeed").value="최고 속도:"+LevelSpeed;
+			s+=' ';
+			//document.getElementById("LevelKillClick").value=LevelKillClick;
+			document.getElementById("GameScore").value="점수:"+GameScore;
+			//document.getElementById("GameStartTime").value=GameStartTime;
+			s+='do';
+			//document.getElementById("GameEndTime").value=new Date().getTime();
+			document.getElementById("Create").value="만든이 : 이동건("+s+"ng gun)";
+		}
+		function go(){
+			location.replace("http://blog.naver.com/cyydo96");
+		}
+	</script>
+	<!-- 클릭객체 -->
+	<script>
+		function nextRandomInteger(limit){
+			return Math.round(Math.random() * limit);
+		}
+		var alphabet = 'ABCDEFGHIJKLNMOPQRSTUVWXYZ';
+		function randomAlphabet(){
+			return alphabet.charAt(nextRandomInteger(25));
+		}
+		function randomSpeed(maxSpeed){
+			return Math.random() * maxSpeed-Math.random()*maxSpeed;
+		}
+		
+	</script>
+	<script>
+		var canvasWidth=700;
+		var canvasHeight=500;
+		function MovingText(){
+			this.x = nextRandomInteger(canvasWidth);
+			this.y = nextRandomInteger(canvasHeight);
+			this.vX = randomSpeed(LevelSpeed);
+			this.vY = randomSpeed(LevelSpeed);
+
+			this.body = document.createElement('h1');
+			this.body.innerHTML = randomAlphabet();
+			this.body.style.position='absolute';
+			this.body.onclick=function(){
+				this.disabled = true;
+				this.style.display = 'none';
+				GameScore+=LevelGetScore;
+				LevelKillClick++;
+				if(LevelKillClick==LevelSetCount){
+				
+					LevelEndTime =new Date().getTime();
+					var PlayTime=(LevelEndTime-LevelStartTime)/1000;
+					var s=PlayTime%60;
+					var m=PlayTime/60;
+					var str='게임 클리어\n';
+					str+='시간:'+s.toFixed(2)+'초\n';
+					str+='점수:'+GameScore+'\n';
+					alert(str);	
+					GameLevelUp();
+				}
+			};
+			document.getElementById("gameview").appendChild(this.body);
+		}
+		MovingText.prototype.move = function(){
+			if(this.x < 0 || this.x > canvasWidth){this.vX *= -1; }
+			if(this.y < 0 || this.y > canvasHeight){this.vY*=-1;}
+
+			this.x += this.vX;
+			this.y += this.vY;
+
+			this.body.style.left= this.x+'px';
+			this.body.style.top=this.y+'px';
+		};
+	</script>
+	<!--window.onload -->
+	<script>
+		//window.onload=GameStartReset();
+		function op(){
+		GameReset();
+		window.onload=function(){
+			for(var i =0;i< LevelSetCount;i++){
+				movingTexts.push(new MovingText());
+			}
+			setInterval(function (){
+				for(var i in movingTexts){
+					movingTexts[i].move();
+				}
+				SetSystemInfomation();
+			},1000/1000);
+			};
+		}
+		op();
+	</script>
+</head>
+<body>
+<table width=760 height=700>
+	<tr>
+		<td>
+			<center>
+			<input type=button value="게임 처음부터 시작" onclick=Restart();>
+			<input type=button value="게임 종료" onclick=GameOver();>
+			<input id="Level" type=button value="정보">
+			<input id="GameScore" type=button value="정보">
+			<input id="LevelSpeed" type=button value="정보">
+			<input id="Create" type=button value="정보" onclick=go();>
+			</center>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<center>
+			<table width=700 height=500>
+				<tr width=700 height=500>
+					<td width=700 height=500>
+						<form id="gameview" width=700 height=500></form>
+					</td>	
+				</tr>
+			</table>
+			</center>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<center>
+			Copyright 2015 Sotaneum Games All rights reversed.
+			</center>
+		</td>
+	</tr>
+</table>
+</body>
+</html>
+
